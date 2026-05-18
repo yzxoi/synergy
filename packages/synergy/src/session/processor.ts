@@ -72,6 +72,10 @@ export namespace SessionProcessor {
       },
       async process(streamInput: LLM.StreamInput) {
         log.info("process")
+        // Enable AI SDK built-in retries for transient network errors (Layer 1).
+        // Without this, ConnectionRefused errors from stale SDK HTTP client state
+        // in long-running processes bypass SDK retry and hit our outer catch (Layer 2).
+        streamInput.retries = streamInput.retries ?? 2
         const shouldBreak = (await Config.get()).experimental?.continue_loop_on_deny !== true
         while (true) {
           try {
