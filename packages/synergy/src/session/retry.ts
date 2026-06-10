@@ -69,8 +69,25 @@ export namespace SessionRetry {
     }
 
     if (typeof error.data?.message === "string") {
+      const msg = error.data.message
+      // Network-level transient errors from Bun runtime / OS that indicate
+      // stale HTTP client state in long-running processes (40h+ uptime).
+      const NETWORK_ERROR_PATTERNS = [
+        "Unable to connect",
+        "ConnectionRefused",
+        "FailedToOpenSocket",
+        "ECONNREFUSED",
+        "ECONNRESET",
+        "fetch failed",
+        "Failed to fetch",
+        "Connection reset",
+      ]
+      for (const pattern of NETWORK_ERROR_PATTERNS) {
+        if (msg.includes(pattern)) return "Transient Network Error"
+      }
+
       try {
-        const json = JSON.parse(error.data.message)
+        const json = JSON.parse(msg)
         if (json.type === "error" && json.error?.type === "too_many_requests") {
           return "Too Many Requests"
         }
