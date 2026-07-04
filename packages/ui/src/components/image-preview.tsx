@@ -49,7 +49,7 @@ export function ImagePreview(props: ImagePreviewProps) {
   const canNext = () => currentIndex() < count() - 1
   const canZoomOut = () => scale() > MIN_IMAGE_SCALE
   const canZoomIn = () => scale() < MAX_IMAGE_SCALE
-  const isZoomed = () => scale() > 1
+  const canDrag = () => scale() !== 1 || pan().x !== 0 || pan().y !== 0 || rotation() !== 0
   const metadata = createMemo(() => {
     const image = current()
     if (!image) return []
@@ -133,7 +133,7 @@ export function ImagePreview(props: ImagePreviewProps) {
   }
 
   function onPointerDown(event: PointerEvent) {
-    if (!isZoomed() || event.button !== 0) return
+    if (!canDrag() || event.button !== 0) return
     const target = event.currentTarget as HTMLElement
     target.setPointerCapture(event.pointerId)
     const offset = pan()
@@ -292,7 +292,7 @@ export function ImagePreview(props: ImagePreviewProps) {
                   </Show>
                   <div
                     data-slot="image-preview-stage"
-                    data-zoomed={isZoomed() ? "true" : "false"}
+                    data-draggable={canDrag() ? "true" : "false"}
                     data-dragging={drag() ? "true" : "false"}
                     onPointerDown={onPointerDown}
                     onPointerMove={onPointerMove}

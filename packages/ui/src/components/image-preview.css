@@ -130,7 +130,7 @@
         user-select: none;
         touch-action: none;
 
-        &[data-zoomed="true"] {
+        &[data-draggable="true"] {
           cursor: grab;
         }
 
